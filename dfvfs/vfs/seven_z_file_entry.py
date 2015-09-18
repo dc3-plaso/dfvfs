@@ -189,5 +189,5 @@ class SevenZFileEntry(file_entry.FileEntry):
         return
 
       seven_z_file = self._file_system.GetSevenZFile()
-      self._seven_z_info =  seven_z_file.getmember(location[1:])
+      self._seven_z_info = seven_z_file.getmember(location[1:])
     return self._seven_z_info

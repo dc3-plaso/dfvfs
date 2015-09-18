@@ -58,7 +58,7 @@ class SevenZFile(os_file_io.OSFile):
       raise ValueError(u'Missing path specification.')
 
     file_system = resolver.Resolver.OpenFileSystem(
-      path_spec, resolver_context=self._resolver_context)
+        path_spec, resolver_context=self._resolver_context)
 
     file_entry = file_system.GetFileEntryByPathSpec(path_spec)
     if not file_entry:
