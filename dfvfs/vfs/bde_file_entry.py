@@ -37,8 +37,8 @@ class BdeFileEntry(root_only_file_entry.RootOnlyFileEntry):
 
     stat_time, stat_time_nano = date_time_values.CopyToStatObject()
     if stat_time is not None:
-      stat_object.crtime = stat_time
-      stat_object.crtime_nano = stat_time_nano
+      stat_object.ctime = stat_time
+      stat_object.ctime_nano = stat_time_nano
 
     # Ownership and permissions stat information.
 

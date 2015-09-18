@@ -9,7 +9,7 @@ from dfvfs.vfs import root_only_file_system
 
 
 class EncodedStreamFileSystem(root_only_file_system.RootOnlyFileSystem):
-  """Class that implements a compresses stream file system object."""
+  """Class that implements a encoded stream file system object."""
 
   TYPE_INDICATOR = definitions.TYPE_INDICATOR_ENCODED_STREAM
 

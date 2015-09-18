@@ -25,6 +25,7 @@ LIBYAL_DEPENDENCIES = {
 PYTHON_DEPENDENCIES = [
     (u'construct', u'__version__', u'2.5.2', None),
     (u'google.protobuf', u'', u'', None),
+    (u'pylzma', u'__version__', u'0.4.6', None),
     (u'six', u'__version__', u'1.1.0', None),
     (u'sqlite3', u'sqlite_version', u'3.7.8', None)]
 
