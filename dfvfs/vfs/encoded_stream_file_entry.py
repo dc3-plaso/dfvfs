@@ -10,7 +10,7 @@ from dfvfs.vfs import vfs_stat
 class EncodedStreamFileEntry(root_only_file_entry.RootOnlyFileEntry):
   """Class that implements a encoded stream file entry object."""
 
-  TYPE_INDICATOR = definitions.TYPE_INDICATOR_ENCRYPTED_STREAM
+  TYPE_INDICATOR = definitions.TYPE_INDICATOR_ENCODED_STREAM
 
   def _GetStat(self):
     """Retrieves the stat object.
@@ -21,17 +21,17 @@ class EncodedStreamFileEntry(root_only_file_entry.RootOnlyFileEntry):
     Raises:
       BackEndError: when the encoded stream is missing.
     """
-    encrypted_stream = self.GetFileObject()
-    if not encrypted_stream:
+    encoded_stream = self.GetFileObject()
+    if not encoded_stream:
       raise errors.BackEndError(
-          u'Unable to open encrypted stream: {0:s}.'.format(
+          u'Unable to open encoded stream: {0:s}.'.format(
               self.path_spec.comparable))
 
     try:
       stat_object = vfs_stat.VFSStat()
 
       # File data stat information.
-      stat_object.size = encrypted_stream.get_size()
+      stat_object.size = encoded_stream.get_size()
 
       # Date and time stat information.
 
@@ -43,6 +43,6 @@ class EncodedStreamFileEntry(root_only_file_entry.RootOnlyFileEntry):
       # Other stat information.
 
     finally:
-      encrypted_stream.close()
+      encoded_stream.close()
 
     return stat_object
