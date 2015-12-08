@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""The encoded stream file entry implementation."""
+"""The encrypted stream file entry implementation."""
 
 from dfvfs.lib import definitions
 from dfvfs.lib import errors
@@ -7,8 +7,8 @@ from dfvfs.vfs import root_only_file_entry
 from dfvfs.vfs import vfs_stat
 
 
-class EncodedStreamFileEntry(root_only_file_entry.RootOnlyFileEntry):
-  """Class that implements a encoded stream file entry object."""
+class EncryptedStreamFileEntry(root_only_file_entry.RootOnlyFileEntry):
+  """Class that implements a encrypted stream file entry object."""
 
   TYPE_INDICATOR = definitions.TYPE_INDICATOR_ENCRYPTED_STREAM
 
@@ -19,7 +19,7 @@ class EncodedStreamFileEntry(root_only_file_entry.RootOnlyFileEntry):
       The stat object (instance of vfs.VFSStat).
 
     Raises:
-      BackEndError: when the encoded stream is missing.
+      BackEndError: when the encrypted stream is missing.
     """
     encrypted_stream = self.GetFileObject()
     if not encrypted_stream:

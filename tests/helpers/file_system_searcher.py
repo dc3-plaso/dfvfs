@@ -208,11 +208,14 @@ class FileSystemSearcherTest(unittest.TestCase):
     self.assertNotEqual(path_spec_generator, None)
 
     expected_locations = sorted([
+        os.path.join(self._os_path, u'syslog.aes'),
         os.path.join(self._os_path, u'syslog.base16'),
         os.path.join(self._os_path, u'syslog.base32'),
         os.path.join(self._os_path, u'syslog.base64'),
+        os.path.join(self._os_path, u'syslog.blowfish'),
         os.path.join(self._os_path, u'syslog.bz2'),
         os.path.join(self._os_path, u'syslog.db'),
+        os.path.join(self._os_path, u'syslog.des3'),
         os.path.join(self._os_path, u'syslog.gz'),
         os.path.join(self._os_path, u'syslog.tar'),
         os.path.join(self._os_path, u'syslog.tgz'),

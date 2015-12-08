@@ -6,12 +6,16 @@ class Factory(object):
   """Class that implements the VFS path specification factory."""
 
   PROPERTY_NAMES = frozenset([
+      u'block_cipher_mode',
       u'column_name',
       u'compression_method',
       u'data_stream',
       u'encoding_method',
+      u'encryption_method',
       u'identifier',
       u'inode',
+      u'iv',
+      u'key',
       u'location',
       u'mft_attribute',
       u'mft_entry',
@@ -20,6 +24,7 @@ class Factory(object):
       u'range_size',
       u'row_condition',
       u'row_index',
+      u'segment_size',
       u'start_offset',
       u'store_index',
       u'table_name'])

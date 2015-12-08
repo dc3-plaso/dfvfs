@@ -355,3 +355,59 @@ class SylogTestCase(unittest.TestCase):
     expected_offset = base_offset + 95
 
     self.assertEqual(file_object.get_offset(), expected_offset)
+
+
+class PaddedSyslogTestCase(SylogTestCase):
+  """The unit test case for the syslog test data padded with a specific number
+  of '=' characters."""
+
+  def setUp(self):
+    """Sets up the needed objects used throughout the test."""
+    self.padding_size = 0
+
+  def _TestGetSizeFileObject(self, file_object):
+    """Runs the get size tests on the file-like object.
+
+    Args:
+      file_object: the file-like object with the test data.
+    """
+    self.assertEqual(file_object.get_size(), 1247 + self.padding_size)
+
+  def _TestSeekFileObject(self, file_object, base_offset=167):
+    """Runs the seek tests on the file-like object.
+
+    Args:
+      file_object: the file-like object with the test data.
+      base_offset: optional base offset use in the tests, the default is 167.
+    """
+    file_object.seek(base_offset + 10)
+    self.assertEqual(file_object.read(5), b'53:01')
+
+    expected_offset = base_offset + 15
+    self.assertEqual(file_object.get_offset(), expected_offset)
+
+    file_object.seek(-10 - self.padding_size, os.SEEK_END)
+    self.assertEqual(file_object.read(5), b'times')
+
+    file_object.seek(2, os.SEEK_CUR)
+    self.assertEqual(file_object.read(2), b'--')
+
+    # Conforming to the POSIX seek the offset can exceed the file size
+    # but reading will result in no data being returned.
+    file_object.seek(2000, os.SEEK_SET)
+    self.assertEqual(file_object.get_offset(), 2000)
+    self.assertEqual(file_object.read(2), b'')
+
+    # Test with an invalid offset.
+    with self.assertRaises(IOError):
+      file_object.seek(-10, os.SEEK_SET)
+
+    # On error the offset should not change.
+    self.assertEqual(file_object.get_offset(), 2000)
+
+    # Test with an invalid whence.
+    with self.assertRaises(IOError):
+      file_object.seek(10, 5)
+
+    # On error the offset should not change.
+    self.assertEqual(file_object.get_offset(), 2000)
