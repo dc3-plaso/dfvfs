@@ -4,6 +4,7 @@
 from dfvfs.lib import date_time
 from dfvfs.lib import definitions
 from dfvfs.lib import errors
+from dfvfs.lib import py2to3
 from dfvfs.path import zip_path_spec
 from dfvfs.vfs import file_entry
 from dfvfs.vfs import vfs_stat
@@ -30,6 +31,8 @@ class ZipDirectory(file_entry.Directory):
     zip_file = self._file_system.GetZipFile()
     for zip_info in zip_file.infolist():
       path = zip_info.filename
+      if not isinstance(path, py2to3.UNICODE_TYPE):
+        path = path.decode(u'cp437')
 
       if not path or not path.startswith(location[1:]):
         continue
@@ -37,10 +40,15 @@ class ZipDirectory(file_entry.Directory):
       _, suffix = self._file_system.GetPathSegmentAndSuffix(location[1:], path)
 
       # Ignore anything that is part of a sub directory or the directory itself.
-      if suffix or path == location:
+      if suffix or path == location[1:]:
         continue
 
       path_spec_location = self._file_system.JoinPath([path])
+
+      # Restore / at end path to indicate a directory.
+      if path.endswith(self._file_system.PATH_SEPARATOR):
+        path_spec_location += self._file_system.PATH_SEPARATOR
+
       yield zip_path_spec.ZipPathSpec(
           location=path_spec_location, parent=self.path_spec.parent)
 
@@ -217,6 +225,8 @@ class ZipFileEntry(file_entry.FileEntry):
 
       if len(location) == 1:
         return
+
+      location = location.encode(u'cp437')
 
       zip_file = self._file_system.GetZipFile()
       self._zip_info = zip_file.getinfo(location[1:])

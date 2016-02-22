@@ -125,7 +125,8 @@ class ZipFileSystem(file_system.FileSystem):
     if zip_info is None:
       return
     return dfvfs.vfs.zip_file_entry.ZipFileEntry(
-        self._resolver_context, self, path_spec, zip_info=zip_info)
+        self._resolver_context, self, path_spec, zip_info=zip_info,
+        is_virtual=location.endswith(self.PATH_SEPARATOR))
 
   def GetRootFileEntry(self):
     """Retrieves the root file entry.
