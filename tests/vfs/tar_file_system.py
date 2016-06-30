@@ -94,20 +94,20 @@ class TARFileSystemTest(unittest.TestCase):
     test_file = os.path.join(u'test_data', u'missing_directory_entries.tar')
     test_file_path_spec = os_path_spec.OSPathSpec(location=test_file)
     path_spec = tar_path_spec.TARPathSpec(
-      location=u'/', parent=test_file_path_spec)
+        location=u'/', parent=test_file_path_spec)
 
     file_system = tar_file_system.TARFileSystem(self._resolver_context)
     self.assertIsNotNone(file_system)
     file_system.Open(path_spec)
 
     path_spec = tar_path_spec.TARPathSpec(
-      location=u'/File System', parent=test_file_path_spec)
+        location=u'/File System', parent=test_file_path_spec)
     file_entry = file_system.GetFileEntryByPathSpec(path_spec)
     self.assertIsNotNone(file_entry)
     self.assertEqual(file_entry.name, u'File System')
 
     path_spec = tar_path_spec.TARPathSpec(
-      location=u'/File System/Recordings', parent=test_file_path_spec)
+        location=u'/File System/Recordings', parent=test_file_path_spec)
     file_entry = file_system.GetFileEntryByPathSpec(path_spec)
     self.assertIsNotNone(file_entry)
     self.assertEqual(file_entry.name, u'Recordings')
