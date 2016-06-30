@@ -15,6 +15,22 @@ from dfvfs.vfs import tar_file_system
 class TARFileEntryTest(unittest.TestCase):
   """The unit test for the TAR extracted file entry object."""
 
+  def _assertSubFileEntires(self, file_entry, expected_sub_file_entry_names):
+    """Helper function that asserts the sub file entries.
+
+    Args:
+      file_entry (FileEntry): a file entry.
+      sub_file_entry_names ([string]): a list of sub file entry names.
+    """
+    sub_file_entry_names = []
+    for sub_file_entry in file_entry.sub_file_entries:
+      sub_file_entry_names.append(sub_file_entry.name)
+
+    self.assertEqual(
+        len(sub_file_entry_names), len(expected_sub_file_entry_names))
+    self.assertEqual(
+        sorted(sub_file_entry_names), sorted(expected_sub_file_entry_names))
+
   def setUp(self):
     """Sets up the needed objects used throughout the test."""
     self._resolver_context = context.Context()
@@ -111,20 +127,40 @@ class TARFileEntryTest(unittest.TestCase):
     file_entry = self._file_system.GetFileEntryByPathSpec(path_spec)
     self.assertIsNotNone(file_entry)
 
-    self.assertIsNotNone(file_entry)
-
     self.assertEqual(file_entry.number_of_sub_file_entries, 1)
 
-    expected_sub_file_entry_names = [u'syslog']
+    self._assertSubFileEntires(file_entry, [u'syslog'])
 
-    sub_file_entry_names = []
+    # Test on a tar file that has missing directory entries.
+    test_file = os.path.join(u'test_data', u'missing_directory_entries.tar')
+    path_spec = os_path_spec.OSPathSpec(location=test_file)
+    path_spec = tar_path_spec.TARPathSpec(location=u'/', parent=path_spec)
+
+    file_system = tar_file_system.TARFileSystem(self._resolver_context)
+    self.assertIsNotNone(file_system)
+    file_system.Open(path_spec)
+
+    file_entry = file_system.GetFileEntryByPathSpec(path_spec)
+    self.assertIsNotNone(file_entry)
+
+    self.assertEqual(file_entry.number_of_sub_file_entries, 2)
+
+    self._assertSubFileEntires(
+        file_entry, [u'File System', u'Non Missing Directory Entry'])
+
     for sub_file_entry in file_entry.sub_file_entries:
-      sub_file_entry_names.append(sub_file_entry.name)
+      # The "File System" and its sub-directories have missing entries within
+      # the tar file, but still should be found due to the AssetManifest.plist
+      # file found within the directories.
+      if sub_file_entry.name == u'File System':
+        self._assertSubFileEntires(sub_file_entry, [u'Recordings'])
+        for sub_sub_file_entry in sub_file_entry.sub_file_entries:
+          self._assertSubFileEntires(
+              sub_sub_file_entry, [u'AssetManifest.plist'])
+      else:
+        self._assertSubFileEntires(sub_file_entry, [u'test_file.txt'])
 
-    self.assertEqual(
-        len(sub_file_entry_names), len(expected_sub_file_entry_names))
-    self.assertEqual(
-        sorted(sub_file_entry_names), sorted(expected_sub_file_entry_names))
+    file_system.Close()
 
   def testDataStreams(self):
     """Test the data streams functionality."""

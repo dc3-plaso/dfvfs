@@ -27,24 +27,55 @@ class TARDirectory(file_entry.Directory):
         not location.startswith(self._file_system.PATH_SEPARATOR)):
       return
 
+    # Remove leading path separator in order to match TAR info names.
+    location = location[1:]
+
+    # Add ending path separator.
+    if location:
+      location += self._file_system.PATH_SEPARATOR
+
+    # Set of top level sub directories that have been yielded.
+    processed_directories = set()
+
     tar_file = self._file_system.GetTARFile()
     for tar_info in tar_file.getmembers():
       path = tar_info.name
 
       # Determine if the start of the TAR info name is similar to
       # the location string. If not the file TAR info refers to is not in
-      # the same directory. Note that the TAR info name does not have the
-      # leading path separator as the location string does.
-      if not path or not path.startswith(location[1:]):
+      # the same directory.
+      if not path or not path.startswith(location):
         continue
 
-      _, suffix = self._file_system.GetPathSegmentAndSuffix(location[1:], path)
-
-      # Ignore anything that is part of a sub directory or the directory itself.
-      if suffix or path == location:
+      # Ignore the directory itself.
+      if path == location:
         continue
 
-      path_spec_location = self._file_system.JoinPath([path])
+      path_segment, suffix = self._file_system.GetPathSegmentAndSuffix(
+          location, path)
+
+      if not path_segment:
+        continue
+
+      # Sometimes the tarfile has missing directory entries.
+      # Therefore, we will process virtual directories using information
+      # from other members.
+      if suffix:
+        path_spec_location = self._file_system.JoinPath([
+            location, path_segment])
+        if path_spec_location in processed_directories:
+          continue
+        processed_directories.add(path_spec_location)
+
+      # Process top level files.
+      else:
+        path_spec_location = self._file_system.JoinPath([path])
+        if tar_info.isdir():
+          if path_spec_location in processed_directories:
+            continue
+          else:
+            processed_directories.add(path_spec_location)
+
       yield tar_path_spec.TARPathSpec(
           location=path_spec_location, parent=self.path_spec.parent)
 
@@ -96,11 +127,12 @@ class TARFileEntry(file_entry.FileEntry):
     """
     if self._link is None:
       tar_info = self.GetTARInfo()
-      if not self._is_virtual and tar_info is None:
+      if not self._is_virtual and not tar_info:
         raise errors.BackEndError(
             u'Missing TAR info in non-virtual file entry.')
 
-      self._link = tar_info.linkname
+      if tar_info:
+        self._link = tar_info.linkname
 
     return self._link
 
@@ -160,13 +192,7 @@ class TARFileEntry(file_entry.FileEntry):
   @property
   def name(self):
     """The name of the file entry, which does not include the full path."""
-    tar_info = self.GetTARInfo()
-
-    # Note that the root file entry is virtual and has no tar_info.
-    if tar_info is None:
-      return u''
-
-    path = getattr(tar_info, u'name', None)
+    path = self.path_spec.location
     if path is not None and not isinstance(path, py2to3.UNICODE_TYPE):
       try:
         path = path.decode(self._file_system.encoding)
@@ -182,7 +208,7 @@ class TARFileEntry(file_entry.FileEntry):
 
     if self._directory:
       for path_spec in self._directory.entries:
-        yield TARFileEntry(self._resolver_context, self._file_system, path_spec)
+        yield self._file_system.GetFileEntryByPathSpec(path_spec)
 
   def GetParentFileEntry(self):
     """Retrieves the parent file entry.
@@ -209,7 +235,8 @@ class TARFileEntry(file_entry.FileEntry):
     """Retrieves the TAR info object.
 
     Returns:
-      The TAR info object (instance of tarfile.TARInfo).
+      The TAR info object (instance of tarfile.TARInfo)
+      or None if it does not exist.
 
     Raises:
       ValueError: if the path specification is incorrect.
@@ -226,6 +253,9 @@ class TARFileEntry(file_entry.FileEntry):
         return
 
       tar_file = self._file_system.GetTARFile()
-      self._tar_info = tar_file.getmember(location[1:])
+      try:
+        self._tar_info = tar_file.getmember(location[1:])
+      except KeyError:
+        pass
 
     return self._tar_info

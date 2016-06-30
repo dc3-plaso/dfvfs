@@ -57,6 +57,10 @@ class TARFile(file_io.FileIO):
       file_system.Close()
       raise IOError(u'Unable to retrieve file entry.')
 
+    if file_entry.IsDirectory():
+      file_system.Close()
+      raise IOError(u'Attempted to open directory.')
+
     self._file_system = file_system
     tar_file = self._file_system.GetTARFile()
     tar_info = file_entry.GetTARInfo()

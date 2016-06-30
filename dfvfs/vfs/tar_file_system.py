@@ -87,22 +87,25 @@ class TARFileSystem(file_system.FileSystem):
     Returns:
       Boolean indicating if the file entry exists.
     """
-    tar_info = None
     location = getattr(path_spec, u'location', None)
 
     if (location is None or
         not location.startswith(self.LOCATION_ROOT)):
-      return
+      return False
 
     if len(location) == 1:
       return True
 
     try:
-      tar_info = self._tar_file.getmember(location[1:])
+      self._tar_file.getmember(location[1:])
     except KeyError:
-      pass
-
-    return tar_info is not None
+      for name in self._tar_file.getnames():
+        # Remove leading path separator in order to match TAR info names.
+        if name.startswith(location[1:] + self.PATH_SEPARATOR):
+          return True
+      return False
+    else:
+      return True
 
   def GetFileEntryByPathSpec(self, path_spec):
     """Retrieves a file entry for a path specification.
@@ -113,12 +116,10 @@ class TARFileSystem(file_system.FileSystem):
     Returns:
       A file entry (instance of vfs.TARFileEntry) or None.
     """
-    tar_info = None
-    location = getattr(path_spec, u'location', None)
-
-    if (location is None or
-        not location.startswith(self.LOCATION_ROOT)):
+    if not self.FileEntryExistsByPathSpec(path_spec):
       return
+
+    location = getattr(path_spec, u'location', None)
 
     if len(location) == 1:
       return dfvfs.vfs.tar_file_entry.TARFileEntry(
@@ -128,12 +129,11 @@ class TARFileSystem(file_system.FileSystem):
     try:
       tar_info = self._tar_file.getmember(location[1:])
     except KeyError:
-      pass
-
-    if tar_info is None:
-      return
-    return dfvfs.vfs.tar_file_entry.TARFileEntry(
-        self._resolver_context, self, path_spec, tar_info=tar_info)
+      return dfvfs.vfs.tar_file_entry.TARFileEntry(
+          self._resolver_context, self, path_spec, is_virtual=True)
+    else:
+      return dfvfs.vfs.tar_file_entry.TARFileEntry(
+          self._resolver_context, self, path_spec, tar_info=tar_info)
 
   def GetRootFileEntry(self):
     """Retrieves the root file entry.
