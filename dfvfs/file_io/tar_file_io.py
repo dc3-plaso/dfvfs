@@ -59,7 +59,7 @@ class TARFile(file_io.FileIO):
 
     if file_entry.IsDirectory():
       file_system.Close()
-      raise IOError(u'Attempted to open directory.')
+      raise IOError(u'Unable to open directory.')
 
     self._file_system = file_system
     tar_file = self._file_system.GetTARFile()

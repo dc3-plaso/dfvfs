@@ -30,9 +30,10 @@ class TARDirectory(file_entry.Directory):
     # Remove leading path separator in order to match TAR info names.
     location = location[1:]
 
-    # Add ending path separator.
+    # Add trailing path separator.
     if location:
-      location += self._file_system.PATH_SEPARATOR
+      location = u'{0:s}{1:s}'.format(
+          location, self._file_system.PATH_SEPARATOR)
 
     # Set of top level sub directories that have been yielded.
     processed_directories = set()
@@ -192,7 +193,7 @@ class TARFileEntry(file_entry.FileEntry):
   @property
   def name(self):
     """The name of the file entry, which does not include the full path."""
-    path = self.path_spec.location
+    path = getattr(self.path_spec, u'location', None)
     if path is not None and not isinstance(path, py2to3.UNICODE_TYPE):
       try:
         path = path.decode(self._file_system.encoding)

@@ -101,11 +101,12 @@ class TARFileSystem(file_system.FileSystem):
     except KeyError:
       for name in self._tar_file.getnames():
         # Remove leading path separator in order to match TAR info names.
-        if name.startswith(location[1:] + self.PATH_SEPARATOR):
+        if name.startswith(
+            u'{0:s}{1:s}'.format(location[1:], self.PATH_SEPARATOR)):
           return True
       return False
-    else:
-      return True
+    
+    return True
 
   def GetFileEntryByPathSpec(self, path_spec):
     """Retrieves a file entry for a path specification.
@@ -131,9 +132,9 @@ class TARFileSystem(file_system.FileSystem):
     except KeyError:
       return dfvfs.vfs.tar_file_entry.TARFileEntry(
           self._resolver_context, self, path_spec, is_virtual=True)
-    else:
-      return dfvfs.vfs.tar_file_entry.TARFileEntry(
-          self._resolver_context, self, path_spec, tar_info=tar_info)
+
+    return dfvfs.vfs.tar_file_entry.TARFileEntry(
+        self._resolver_context, self, path_spec, tar_info=tar_info)
 
   def GetRootFileEntry(self):
     """Retrieves the root file entry.

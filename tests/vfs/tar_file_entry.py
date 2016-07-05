@@ -15,12 +15,12 @@ from dfvfs.vfs import tar_file_system
 class TARFileEntryTest(unittest.TestCase):
   """The unit test for the TAR extracted file entry object."""
 
-  def _assertSubFileEntires(self, file_entry, expected_sub_file_entry_names):
+  def _assertSubFileEntries(self, file_entry, expected_sub_file_entry_names):
     """Helper function that asserts the sub file entries.
 
     Args:
-      file_entry (FileEntry): a file entry.
-      sub_file_entry_names ([string]): a list of sub file entry names.
+      file_entry (FileEntry): file entry.
+      sub_file_entry_names (list[str]): sub file entry names.
     """
     sub_file_entry_names = []
     for sub_file_entry in file_entry.sub_file_entries:
@@ -129,7 +129,7 @@ class TARFileEntryTest(unittest.TestCase):
 
     self.assertEqual(file_entry.number_of_sub_file_entries, 1)
 
-    self._assertSubFileEntires(file_entry, [u'syslog'])
+    self._assertSubFileEntries(file_entry, [u'syslog'])
 
     # Test on a tar file that has missing directory entries.
     test_file = os.path.join(u'test_data', u'missing_directory_entries.tar')
@@ -145,7 +145,7 @@ class TARFileEntryTest(unittest.TestCase):
 
     self.assertEqual(file_entry.number_of_sub_file_entries, 2)
 
-    self._assertSubFileEntires(
+    self._assertSubFileEntries(
         file_entry, [u'File System', u'Non Missing Directory Entry'])
 
     for sub_file_entry in file_entry.sub_file_entries:
@@ -153,12 +153,12 @@ class TARFileEntryTest(unittest.TestCase):
       # the tar file, but still should be found due to the AssetManifest.plist
       # file found within the directories.
       if sub_file_entry.name == u'File System':
-        self._assertSubFileEntires(sub_file_entry, [u'Recordings'])
+        self._assertSubFileEntries(sub_file_entry, [u'Recordings'])
         for sub_sub_file_entry in sub_file_entry.sub_file_entries:
-          self._assertSubFileEntires(
+          self._assertSubFileEntries(
               sub_sub_file_entry, [u'AssetManifest.plist'])
       else:
-        self._assertSubFileEntires(sub_file_entry, [u'test_file.txt'])
+        self._assertSubFileEntries(sub_file_entry, [u'test_file.txt'])
 
     file_system.Close()
 
