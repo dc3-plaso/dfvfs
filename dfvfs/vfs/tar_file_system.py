@@ -105,7 +105,7 @@ class TARFileSystem(file_system.FileSystem):
             u'{0:s}{1:s}'.format(location[1:], self.PATH_SEPARATOR)):
           return True
       return False
-    
+
     return True
 
   def GetFileEntryByPathSpec(self, path_spec):
