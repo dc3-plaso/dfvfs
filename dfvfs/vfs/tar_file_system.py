@@ -127,14 +127,14 @@ class TARFileSystem(file_system.FileSystem):
           self._resolver_context, self, path_spec, is_root=True,
           is_virtual=True)
 
+    kwargs = {}
     try:
-      tar_info = self._tar_file.getmember(location[1:])
+      kwargs[u'tar_info'] = self._tar_file.getmember(location[1:])
     except KeyError:
-      return dfvfs.vfs.tar_file_entry.TARFileEntry(
-          self._resolver_context, self, path_spec, is_virtual=True)
+      kwargs[u'is_virtual'] = True
 
     return dfvfs.vfs.tar_file_entry.TARFileEntry(
-        self._resolver_context, self, path_spec, tar_info=tar_info)
+        self._resolver_context, self, path_spec, **kwargs)
 
   def GetRootFileEntry(self):
     """Retrieves the root file entry.
